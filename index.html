@@ -2,6 +2,9 @@
 <html lang="id">
 
 <head>
+     <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#007bff">
+    
     <meta charset="UTF-8">
     <title>Input Keuangan</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -234,6 +237,13 @@
         });
 
         window.onload = ambilId;
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/serviceWorker.js')
+                .then(reg => console.log('Service Worker terdaftar:', reg.scope))
+                .catch(err => console.log('Service Worker gagal:', err));
+        }
     </script>
 </body>
 
