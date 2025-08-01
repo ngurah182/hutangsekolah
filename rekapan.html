@@ -107,36 +107,61 @@
                         return;
                     }
 
+                    let totalJumlah = 0;
+                    let totalDikembalikan = 0;
+                    let totalSisa = 0;
+
+                    const rows = data.map(row => {
+                        const jumlah = parseFloat(row.jumlah) || 0;
+                        const dikembalikan = parseFloat(row.dikembalikan) || 0;
+                        const sisa = parseFloat(row.sisa) || 0;
+
+                        totalJumlah += jumlah;
+                        totalDikembalikan += dikembalikan;
+                        totalSisa += sisa;
+
+                        return `
+                            <tr>
+                                <td>${row.id}</td>
+                                <td>${row.uraian}</td>
+                                <td class="text-center">${row.volume}</td>
+                                <td>${row.satuan}</td>
+                                <td class="text-right">${formatRupiah(row.tarif)}</td>
+                                <td class="text-right">${formatRupiah(jumlah)}</td>
+                                <td class="text-right">${formatRupiah(dikembalikan)}</td>
+                                <td class="text-right">${formatRupiah(sisa)}</td>
+                            </tr>
+                        `;
+                    }).join("");
+
                     const tableHTML = `
-                    <table class="table table-bordered table-striped table-hover">
-                      <thead class="thead-dark">
-                        <tr>
-                          <th>ID</th>
-                          <th>Uraian</th>
-                          <th class="text-center">Volume</th>
-                          <th>Satuan</th>
-                          <th class="text-center">Tarif</th>
-                          <th class="text-center">Jumlah Awal</th>
-                          <th class="text-center">Telah Dikembalikan</th>
-                          <th class="text-center">Sisa</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        ${data.map(row => `
-                          <tr>
-                            <td>${row.id}</td>
-                            <td>${row.uraian}</td>
-                            <td class="text-center">${row.volume}</td>
-                            <td>${row.satuan}</td>
-                            <td class="text-right">${formatRupiah(row.tarif)}</td>
-                            <td class="text-right">${formatRupiah(row.jumlah)}</td>
-                            <td class="text-right">${formatRupiah(row.dikembalikan)}</td>
-                            <td class="text-right">${formatRupiah(row.sisa)}</td>
-                          </tr>
-                        `).join("")}
-                      </tbody>
-                    </table>
-                `;
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Uraian</th>
+                                    <th class="text-center">Volume</th>
+                                    <th>Satuan</th>
+                                    <th class="text-center">Tarif</th>
+                                    <th class="text-center">Jumlah Awal</th>
+                                    <th class="text-center">Telah Dikembalikan</th>
+                                    <th class="text-center">Sisa</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rows}
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-light font-weight-bold">
+                                    <td colspan="5" class="text-right">Total</td>
+                                    <td class="text-right">${formatRupiah(totalJumlah)}</td>
+                                    <td class="text-right">${formatRupiah(totalDikembalikan)}</td>
+                                    <td class="text-right">${formatRupiah(totalSisa)}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    `;
+
                     document.getElementById("tabelRekapan").innerHTML = tableHTML;
                 })
                 .catch(err => {
