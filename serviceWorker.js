@@ -1,4 +1,4 @@
-const CACHE_NAME = "absensi-cache-v1";
+const CACHE_NAME = "hutang-BOSP-cache-v1";
 const urlsToCache = [
   "/",
   "/index.html",
