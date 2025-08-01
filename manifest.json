@@ -1,6 +1,6 @@
 {
-  "name": "Tabungan Sekolah",
-  "short_name": "Tabungan",
+  "name": "Hutang BOSP",
+  "short_name": "BOSP",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
