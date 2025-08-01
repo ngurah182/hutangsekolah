@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Transaksi Keuangan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <span class="nav-link">Form Transaksi</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Sidebar -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <a href="#" class="brand-link text-center">
+                <span class="brand-text font-weight-light">Admin Keuangan</span>
+            </a>
+            <div class="sidebar">
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column">
+                        <li class="nav-item"><a href="index.html" class="nav-link"><i class="nav-icon fas fa-edit"></i>
+                                <p>Input Data</p>
+                            </a></li>
+                        <li class="nav-item"><a href="transaksi.html" class="nav-link active"><i
+                                    class="nav-icon fas fa-exchange-alt"></i>
+                                <p>Transaksi</p>
+                            </a></li>
+                        <li class="nav-item"><a href="pengembalian.html" class="nav-link"><i
+                                    class="nav-icon fas fa-undo"></i>
+                                <p>Pengembalian</p>
+                            </a></li>
+                        <li class="nav-item"><a href="rekapan.html" class="nav-link"><i
+                                    class="nav-icon fas fa-table"></i>
+                                <p>Rekapan</p>
+                            </a></li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Content -->
+        <div class="content-wrapper p-4">
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <h3 class="card-title">Form Transaksi</h3>
+                        </div>
+                        <form id="formTransaksi">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="tanggal">Tanggal</label>
+                                    <input type="date" class="form-control" id="tanggal" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="uraian">Uraian</label>
+                                    <select class="form-control" id="uraian" required></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sisa">Sisa Anggaran</label>
+                                    <input type="text" class="form-control" id="sisa" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="jumlah">Jumlah (Rp)</label>
+                                    <input type="text" class="form-control" id="jumlah" required>
+                                    <small id="terbilang" class="form-text text-muted"></small>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-success">Simpan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        const webAppUrl = "https://script.google.com/macros/s/AKfycbxA6kuIKr6OA0_lvL9lRzp3kKfZrZGODDw-sX2KsZryLR1HsSVISAj2gfzwyTDlMEv0EA/exec";
+        let dataRekapan = [];
+
+        function ambilUraian() {
+            fetch(`${webAppUrl}?action=getRekapan`)
+                .then(res => res.json())
+                .then(data => {
+                    dataRekapan = data;
+                    const select = document.getElementById("uraian");
+                    select.innerHTML = data.map(u => `<option value="${u.uraian}">${u.uraian}</option>`).join("");
+                    tampilkanSisa(); // setelah selesai load langsung tampilkan sisa pertama
+                });
+        }
+
+        function tampilkanSisa() {
+            const uraian = document.getElementById("uraian").value;
+            const row = dataRekapan.find(r => r.uraian === uraian);
+            if (row) {
+                document.getElementById("sisa").value = `Rp ${formatRupiah(row.sisa)}`;
+            } else {
+                document.getElementById("sisa").value = "Rp 0";
+            }
+        }
+
+        function formatRupiah(angka) {
+            const number = angka.toString().replace(/\D/g, "");
+            return number.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function terbilang(nilai) {
+            const satuan = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan"];
+            const level = ["", "ribu", "juta", "miliar", "triliun"];
+            if (nilai === "0" || nilai === "") return "nol rupiah";
+
+            function threeDigitToWord(num) {
+                let kata = "";
+                const ratus = Math.floor(num / 100);
+                const puluh = Math.floor((num % 100) / 10);
+                const satu = num % 10;
+
+                if (ratus > 0) kata += (ratus === 1 ? "seratus " : satuan[ratus] + " ratus ");
+                if (puluh > 0) {
+                    if (puluh === 1) {
+                        if (satu === 0) kata += "sepuluh ";
+                        else if (satu === 1) kata += "sebelas ";
+                        else kata += satuan[satu] + " belas ";
+                        return kata;
+                    } else kata += satuan[puluh] + " puluh ";
+                }
+                if (puluh !== 1 && satu > 0) kata += satuan[satu] + " ";
+                return kata;
+            }
+
+            let angka = nilai.replace(/[^\d]/g, "");
+            let hasil = "", levelIdx = 0;
+            while (angka.length > 0) {
+                const potongan = angka.slice(-3);
+                angka = angka.slice(0, -3);
+                const potonganInt = parseInt(potongan, 10);
+                if (potonganInt > 0) {
+                    const kata = threeDigitToWord(potonganInt);
+                    hasil = kata + level[levelIdx] + " " + hasil;
+                }
+                levelIdx++;
+            }
+            hasil = hasil.replace("satu ribu", "seribu");
+            return hasil.trim() + " rupiah";
+        }
+
+        document.getElementById("uraian").addEventListener("change", tampilkanSisa);
+
+        document.getElementById("jumlah").addEventListener("input", function () {
+            const input = this.value.replace(/\./g, "").replace(/[^\d]/g, "");
+            const angka = parseInt(input) || 0;
+            this.value = formatRupiah(String(angka));
+            document.getElementById("terbilang").innerText = angka ? `Terbilang: ${terbilang(String(angka))}` : "";
+        });
+
+        document.getElementById("formTransaksi").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const tanggal = document.getElementById("tanggal").value;
+            const jumlah = document.getElementById("jumlah").value.replace(/\./g, "").replace(/[^\d]/g, "");
+            const uraian = document.getElementById("uraian").value;
+
+            if (!tanggal || !jumlah || !uraian) {
+                Swal.fire({ icon: 'warning', title: 'Lengkapi form terlebih dahulu!' });
+                return;
+            }
+
+            const params = new URLSearchParams({
+                target: "transaksi",
+                tanggal: tanggal,
+                uraian: uraian,
+                jumlah: jumlah,
+                keterangan: "Pending"
+            });
+
+            Swal.fire({
+                title: 'Menyimpan...',
+                text: 'Mohon tunggu sebentar',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            fetch(`${webAppUrl}?${params}`)
+                .then(res => res.text())
+                .then(msg => {
+                    Swal.close();
+                    const success = msg.startsWith("✅");
+                    Swal.fire({
+                        icon: success ? 'success' : 'error',
+                        title: success ? 'Berhasil' : 'Gagal',
+                        text: msg.replace(/^✅ |^❌ /, '')
+                    });
+
+                    if (success) {
+                        document.getElementById("formTransaksi").reset();
+                        document.getElementById("terbilang").innerText = "";
+                        document.getElementById("tanggal").valueAsDate = new Date();
+                        tampilkanSisa();
+                    }
+                })
+                .catch(err => {
+                    Swal.fire({ icon: 'error', title: 'Kesalahan', text: `Gagal menyimpan data: ${err.message}` });
+                });
+        });
+
+        window.onload = () => {
+            ambilUraian();
+            document.getElementById("tanggal").valueAsDate = new Date();
+        };
+    </script>
+</body>
+
+</html>

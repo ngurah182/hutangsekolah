@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Input Keuangan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+    <!-- AdminLTE -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block"><span class="nav-link">Form Input Keuangan</span></li>
+            </ul>
+        </nav>
+
+        <!-- Sidebar -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <a href="#" class="brand-link text-center"><span class="brand-text font-weight-light">Admin
+                    Keuangan</span></a>
+            <div class="sidebar">
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
+                        <li class="nav-item"><a href="index.html" class="nav-link active"><i
+                                    class="nav-icon fas fa-edit"></i>
+                                <p>Input Data</p>
+                            </a></li>
+                        <li class="nav-item"><a href="transaksi.html" class="nav-link"><i
+                                    class="nav-icon fas fa-exchange-alt"></i>
+                                <p>Transaksi</p>
+                            </a></li>
+                        <li class="nav-item"><a href="pengembalian.html" class="nav-link"><i
+                                    class="nav-icon fas fa-undo"></i>
+                                <p>Pengembalian</p>
+                            </a></li>
+                        <li class="nav-item"><a href="rekapan.html" class="nav-link"><i
+                                    class="nav-icon fas fa-table"></i>
+                                <p>Rekapan</p>
+                            </a></li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Content -->
+        <div class="content-wrapper p-4">
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Form Input Keuangan</h3>
+                        </div>
+                        <form id="formInput">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="id">ID</label>
+                                    <input type="number" class="form-control" id="id" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="uraian">Uraian</label>
+                                    <input type="text" class="form-control" id="uraian" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="volume">Volume</label>
+                                    <input type="number" class="form-control" id="volume" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="satuan">Satuan</label>
+                                    <input type="text" class="form-control" id="satuan" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="tarif">Tarif Harga</label>
+                                    <input type="text" class="form-control" id="tarif" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="jumlah">Jumlah (Rp)</label>
+                                    <input type="text" class="form-control" id="jumlah" readonly>
+                                    <small id="terbilang" class="form-text text-muted"></small>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">Kirim</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        const webAppUrl = "https://script.google.com/macros/s/AKfycbxA6kuIKr6OA0_lvL9lRzp3kKfZrZGODDw-sX2KsZryLR1HsSVISAj2gfzwyTDlMEv0EA/exec";
+
+        function ambilId() {
+            fetch(`${webAppUrl}?action=getLastId`)
+                .then(res => res.text())
+                .then(id => document.getElementById("id").value = id);
+        }
+
+        function formatRupiah(angka) {
+            let number_string = angka.replace(/[^,\d]/g, "").toString(),
+                split = number_string.split(","),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/g);
+
+            if (ribuan) {
+                rupiah += (sisa ? "." : "") + ribuan.join(".");
+            }
+            return rupiah;
+        }
+
+        function terbilang(nilai) {
+            const satuan = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan"];
+            const level = ["", "ribu", "juta", "miliar", "triliun"];
+            if (nilai === "0" || nilai === "") return "nol rupiah";
+
+            function threeDigitToWord(num) {
+                let kata = "";
+                const ratus = Math.floor(num / 100);
+                const puluh = Math.floor((num % 100) / 10);
+                const satu = num % 10;
+
+                if (ratus > 0) kata += (ratus === 1 ? "seratus " : satuan[ratus] + " ratus ");
+                if (puluh > 0) {
+                    if (puluh === 1) {
+                        if (satu === 0) kata += "sepuluh ";
+                        else if (satu === 1) kata += "sebelas ";
+                        else kata += satuan[satu] + " belas ";
+                        return kata;
+                    } else kata += satuan[puluh] + " puluh ";
+                }
+                if (puluh !== 1 && satu > 0) kata += satuan[satu] + " ";
+                return kata;
+            }
+
+            let angka = nilai.replace(/[^\d]/g, "");
+            let hasil = "", levelIdx = 0;
+            while (angka.length > 0) {
+                const potongan = angka.slice(-3);
+                angka = angka.slice(0, -3);
+                const potonganInt = parseInt(potongan, 10);
+                if (potonganInt > 0) {
+                    const kata = threeDigitToWord(potonganInt);
+                    hasil = kata + level[levelIdx] + " " + hasil;
+                }
+                levelIdx++;
+            }
+            hasil = hasil.replace("satu ribu", "seribu");
+            return hasil.trim() + " rupiah";
+        }
+
+        function hitungJumlah() {
+            const vol = parseInt(document.getElementById("volume").value) || 0;
+            const tarifRaw = document.getElementById("tarif").value.replace(/\./g, "") || "0";
+            const tarif = parseInt(tarifRaw);
+            const total = vol * tarif;
+
+            document.getElementById("jumlah").value = formatRupiah(String(total));
+            document.getElementById("terbilang").innerText = total ? `Terbilang: ${terbilang(String(total))}` : "";
+        }
+
+        document.getElementById("volume").addEventListener("input", hitungJumlah);
+        document.getElementById("tarif").addEventListener("input", function (e) {
+            const angka = e.target.value.replace(/\./g, "");
+            e.target.value = formatRupiah(angka);
+            hitungJumlah();
+        });
+
+        document.getElementById("formInput").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const tarif = document.getElementById("tarif").value.replace(/\./g, "");
+            const jumlah = document.getElementById("jumlah").value.replace(/\./g, "");
+
+            const data = {
+                id: document.getElementById("id").value,
+                uraian: document.getElementById("uraian").value,
+                volume: document.getElementById("volume").value,
+                satuan: document.getElementById("satuan").value,
+                tarif: tarif,
+                jumlah: jumlah
+            };
+
+            const params = new URLSearchParams(data).toString();
+
+            Swal.fire({
+                title: "Menyimpan...",
+                text: "Mohon tunggu",
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            fetch(`${webAppUrl}?${params}`)
+                .then(res => res.text())
+                .then(msg => {
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: msg || "Data berhasil disimpan"
+                    });
+                    document.getElementById("formInput").reset();
+                    document.getElementById("jumlah").value = "";
+                    document.getElementById("terbilang").innerText = "";
+                    ambilId();
+                })
+                .catch(err => {
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: `Terjadi kesalahan: ${err.message}`
+                    });
+                });
+        });
+
+        window.onload = ambilId;
+    </script>
+</body>
+
+</html>
